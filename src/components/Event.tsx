@@ -25,7 +25,6 @@ const Event: FC = () => {
   useEffect(() => {
     const checkEvent = async () => {
       let eventName = '';
-      console.log('CHECKING EVENT');
       setLoading(true);
       try {
         const eventDetails = (await firestore.events.doc(eventId).get()).data();

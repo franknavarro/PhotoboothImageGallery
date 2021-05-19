@@ -23,10 +23,6 @@ const useImageLibrary = (uid: string) => {
 
   const getNextPage = useCallback(async () => {
     if (loadingImages || !startNextPage) return;
-    console.log('LOADING NEXT', {
-      s: startNextPage?.id,
-      l: loadingImages,
-    });
     setLoadingImages(true);
     const nextImages = await query.startAfter(startNextPage).get();
     if (!nextImages.empty) {
@@ -40,11 +36,6 @@ const useImageLibrary = (uid: string) => {
 
   const getNewImages = useCallback(async () => {
     if (loadingImages || !shouldFindNew || !beginingOfPage) return;
-    console.log('LOADING NEW', {
-      f: !shouldFindNew,
-      b: beginingOfPage?.id,
-      l: loadingImages,
-    });
     setLoadingImages(true);
     const newImages = await query.endBefore(beginingOfPage).get();
     if (!newImages.empty) {
@@ -92,6 +83,7 @@ const useImageLibrary = (uid: string) => {
     }
   }, [handleObserver]);
 
+  // Load when reached end of slides
   useEffect(() => {
     if (position === images.length - 1 && !loadingImages) {
       if (startNextPage) getNextPage();
