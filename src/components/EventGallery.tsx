@@ -1,9 +1,12 @@
-import { Container, makeStyles } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Container from '@material-ui/core/Container';
+import clsx from 'clsx';
 import { FC, useState } from 'react';
-import useImageLibrary from '../hooks/useImageLibrary';
 import ImageTile from './ImageTile';
 import ImageViewer from './ImageViewer/ImageViewer';
 import LazyLoad from 'react-lazyload';
+import useImageLibrary from '../hooks/useImageLibrary';
 
 interface EventGalleryProps {
   uid: string;
@@ -45,13 +48,28 @@ const useStyles = makeStyles((theme) => ({
     margin: 0,
     padding: 0,
   },
+  loadContainer: {
+    display: 'flex',
+    width: '100%',
+    margin: `${theme.spacing(4)}px 0`,
+    justifyContent: 'center',
+    minHeight: theme.spacing(2),
+  },
+  hideLoad: {
+    display: 'none',
+  },
 }));
 
 const EventGallery: FC<EventGalleryProps> = ({ uid }) => {
   const classes = useStyles();
-  const [largeIndex, setLargeIndex] = useState<number>(0);
   const [showViewer, setShowViewer] = useState<boolean>(false);
-  const { images } = useImageLibrary(uid);
+  const {
+    images,
+    loadMoreRef,
+    loadingImages,
+    position,
+    setPosition,
+  } = useImageLibrary(uid);
 
   return (
     <>
@@ -67,23 +85,25 @@ const EventGallery: FC<EventGalleryProps> = ({ uid }) => {
               <ImageTile
                 image={doc.data().thumbnail}
                 onClick={() => {
-                  setLargeIndex(index);
+                  setPosition(index);
                   setShowViewer(true);
                 }}
               />
             </LazyLoad>
           ))}
         </ul>
+        <div className={classes.loadContainer} ref={loadMoreRef}>
+          <CircularProgress
+            className={clsx(!loadingImages && classes.hideLoad)}
+          />
+        </div>
       </Container>
       <ImageViewer
         display={showViewer}
         images={images}
-        onClose={() => {
-          console.log('CLOSE');
-          setShowViewer(false);
-        }}
-        position={largeIndex}
-        setPosition={setLargeIndex}
+        onClose={() => setShowViewer(false)}
+        position={position}
+        setPosition={setPosition}
       />
     </>
   );

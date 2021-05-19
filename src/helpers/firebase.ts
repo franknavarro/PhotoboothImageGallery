@@ -21,7 +21,8 @@ export type ImageData = {
   thumbnail: string;
 };
 
-export type ImageDocs = firebase.firestore.QueryDocumentSnapshot<ImageData>[];
+export type ImageDoc = firebase.firestore.QueryDocumentSnapshot<ImageData>;
+export type ImageDocs = ImageDoc[];
 
 const dataPoint = <T>(collectionPath: string) =>
   firebase
