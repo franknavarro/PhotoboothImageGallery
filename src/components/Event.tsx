@@ -1,11 +1,13 @@
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useState } from 'react';
 import { useParams } from 'react-router';
 import useAsync from '../hooks/useAsync';
 import { useAuth } from '../hooks/useAuth';
 import extractUsername from '../helpers/extractUsername';
 import EventLogin from './EventLogin';
-import useQuery from '../hooks/useQuery';
 import EventGallery from './EventGallery';
+import { firestore } from '../helpers/firebase';
+import useQuery from '../hooks/useQuery';
+import { SignInErrors } from './EventLogin';
 
 interface EventParams {
   eventId: string;
@@ -13,41 +15,42 @@ interface EventParams {
 
 const Event: FC = () => {
   const { eventId } = useParams<EventParams>();
-  const { signIn, user } = useAuth();
+  const { user, signIn } = useAuth();
+  const [signInError, setSignInError] = useState<SignInErrors>('null');
   const queryParams = useQuery();
 
   const pageExists = useCallback(async () => {
-    let exists = true;
+    let eventName = '';
     try {
-      let username;
-      let password = queryParams.get('p');
-      if (user && user.email) {
-        username = extractUsername(user.email);
-      }
-      if (username !== eventId) {
-        await signIn(eventId, password || 'p');
+      const eventDetails = (await firestore.events.doc(eventId).get()).data();
+      if (eventDetails) {
+        eventName = eventDetails.name;
+        const password = queryParams.get('p');
+        if (!!eventName && !!password) {
+          await signIn(eventId, password);
+        }
       }
     } catch (error) {
-      if (
-        error.code === 'auth/invalid-email' ||
-        error.code === 'auth/user-disabled' ||
-        error.code === 'auth/user-not-found'
-      ) {
-        exists = false;
-      }
+      setSignInError(error.code);
     } finally {
-      return exists;
+      return eventName;
     }
-  }, [eventId, signIn, user, queryParams]);
-  const { loading, value } = useAsync<boolean>(pageExists);
+  }, [eventId, queryParams, signIn]);
+  const { loading, value: eventName } = useAsync<string>(pageExists);
 
   if (loading) return <></>;
-  if (!value) return <div>Event Not Found</div>;
+  if (!eventName) return <div>Event Not Found</div>;
   if (
     !user ||
     (user && user.email && extractUsername(user.email) !== eventId)
   ) {
-    return <EventLogin eventId={eventId} />;
+    return (
+      <EventLogin
+        eventId={eventId}
+        eventName={eventName}
+        defaultError={signInError}
+      />
+    );
   }
 
   return <EventGallery uid={user.uid} />;

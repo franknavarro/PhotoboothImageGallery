@@ -1,4 +1,4 @@
-import { FC, useCallback, useState, FormEvent } from 'react';
+import { FC, useState, FormEvent } from 'react';
 import PhotoLibraryIcon from '@material-ui/icons/PhotoLibrary';
 import {
   Avatar,
@@ -11,15 +11,14 @@ import {
   Typography,
 } from '@material-ui/core';
 import { useAuth } from '../hooks/useAuth';
-import useAsync from '../hooks/useAsync';
 
-interface EventLoginProps {
-  eventId: string;
-}
 const ERROR_MESSAGES = {
-  'auth/wrong-password': 'Wrong Password',
+  'auth/wrong-password':
+    'Wrong Password. The password can be found on the photobooth.',
   'auth/too-many-requests': 'Too many attempts. Please try again later.',
+  null: '',
 };
+export type SignInErrors = keyof typeof ERROR_MESSAGES;
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -42,24 +41,37 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const EventLogin: FC<EventLoginProps> = ({ eventId }) => {
+interface EventLoginProps {
+  eventId: string;
+  eventName: string;
+  defaultError: SignInErrors;
+}
+
+const EventLogin: FC<EventLoginProps> = ({
+  eventId,
+  eventName,
+  defaultError,
+}) => {
   const classes = useStyles();
   const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<SignInErrors>(defaultError);
+  const [loading, setLoading] = useState<boolean>(false);
   const { signIn } = useAuth();
 
-  const runSignIn = useCallback(() => signIn(eventId, password), [
-    eventId,
-    password,
-    signIn,
-  ]);
-  const { loading, execute, error } = useAsync(runSignIn, false);
-
-  const submitForm = (event: FormEvent<HTMLFormElement>) => {
+  const submitForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    execute();
+    try {
+      setLoading(true);
+      if (password) await signIn(eventId, password);
+      else {
+        setError('auth/wrong-password');
+        setLoading(false);
+      }
+    } catch (err) {
+      setError(err.code);
+      setLoading(false);
+    }
   };
-
-  const errorCode = error?.code as keyof typeof ERROR_MESSAGES;
 
   return (
     <Container component="main" maxWidth="xs">
@@ -68,13 +80,13 @@ const EventLogin: FC<EventLoginProps> = ({ eventId }) => {
           <PhotoLibraryIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Enter Event Password
+          Enter {eventName} Password
         </Typography>
         <form className={classes.form} noValidate onSubmit={submitForm}>
           <TextField
             disabled={loading}
-            error={!!error}
-            helperText={ERROR_MESSAGES[errorCode] || ''}
+            error={error !== 'null'}
+            helperText={ERROR_MESSAGES[error]}
             variant="outlined"
             margin="normal"
             required
