@@ -1,8 +1,8 @@
 import { Container, makeStyles } from '@material-ui/core';
 import { FC, useState } from 'react';
-import useStorage from '../hooks/useStorage';
+import useImageLibrary from '../hooks/useImageLibrary';
 import ImageTile from './ImageTile';
-import ImageViewer from './ImageViewer';
+import ImageViewer from './ImageViewer/ImageViewer';
 import LazyLoad from 'react-lazyload';
 
 interface EventGalleryProps {
@@ -49,27 +49,39 @@ const useStyles = makeStyles((theme) => ({
 
 const EventGallery: FC<EventGalleryProps> = ({ uid }) => {
   const classes = useStyles();
-  const [largeIndex, setLargeIndex] = useState<number>(-1);
-  const [files] = useStorage(uid);
+  const [largeIndex, setLargeIndex] = useState<number>(0);
+  const [showViewer, setShowViewer] = useState<boolean>(false);
+  const { images } = useImageLibrary(uid);
 
   return (
     <>
       <Container maxWidth="lg" classes={{ root: classes.container }}>
         <ul className={classes.root}>
-          {files.map((file, index) => (
+          {images.map((doc, index) => (
             <LazyLoad
-              key={file.name}
+              key={doc.id}
               classNamePrefix={classes.imageItem}
               offset={100}
               once
             >
-              <ImageTile image={file} onClick={() => setLargeIndex(index)} />
+              <ImageTile
+                image={doc.data().thumbnail}
+                onClick={() => {
+                  setLargeIndex(index);
+                  setShowViewer(true);
+                }}
+              />
             </LazyLoad>
           ))}
         </ul>
       </Container>
       <ImageViewer
-        images={files}
+        display={showViewer}
+        images={images}
+        onClose={() => {
+          console.log('CLOSE');
+          setShowViewer(false);
+        }}
         position={largeIndex}
         setPosition={setLargeIndex}
       />

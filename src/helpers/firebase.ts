@@ -15,6 +15,14 @@ firebase.initializeApp({
 export const auth = firebase.auth();
 export const storage = firebase.storage().ref();
 
+export type ImageData = {
+  createdAt: firebase.firestore.Timestamp;
+  full: string;
+  thumbnail: string;
+};
+
+export type ImageDocs = firebase.firestore.QueryDocumentSnapshot<ImageData>[];
+
 const dataPoint = <T>(collectionPath: string) =>
   firebase
     .firestore()
@@ -26,4 +34,5 @@ const dataPoint = <T>(collectionPath: string) =>
 
 export const firestore = {
   events: dataPoint<{ name: string }>('events'),
+  pictures: (uid: string) => dataPoint<ImageData>(uid),
 };

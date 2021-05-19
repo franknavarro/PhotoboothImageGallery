@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ImageRef } from '../hooks/useStorage';
 
-const useImageLoad = (imgRef: ImageRef | undefined) => {
+const useImageLoad = (src: string) => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [src, setSrc] = useState<string>('');
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
@@ -11,15 +9,13 @@ const useImageLoad = (imgRef: ImageRef | undefined) => {
       try {
         setLoading(true);
         setError(false);
-        if (!imgRef) throw new Error('No image found');
-        const newSource = await imgRef.getDownloadURL();
-        setSrc(newSource);
-        const image = new Image();
-        image.src = newSource;
-        image.onload = () => {
+        if (src === '') throw new Error('No image found');
+        const imgRef = new Image();
+        imgRef.src = src;
+        imgRef.onload = () => {
           setLoading(false);
         };
-        image.onerror = () => {
+        imgRef.onerror = () => {
           setError(true);
           setLoading(false);
         };
@@ -29,7 +25,7 @@ const useImageLoad = (imgRef: ImageRef | undefined) => {
       }
     };
     startLoading();
-  }, [imgRef]);
+  }, [src]);
 
   return { src, loading, error };
 };

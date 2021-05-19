@@ -1,17 +1,16 @@
 import { makeStyles } from '@material-ui/core';
 import clsx from 'clsx';
 import { FC, MouseEventHandler } from 'react';
-import { ImageRef } from '../hooks/useStorage';
 import SlideshowIcon from '@material-ui/icons/Slideshow';
 import BrokenImageIcon from '@material-ui/icons/BrokenImage';
 import useImageLoad from '../hooks/useImageLoad';
 
 interface ImageTileProps {
-  image: ImageRef;
+  image: string;
   onClick: MouseEventHandler<HTMLDivElement>;
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles({
   fullSize: {
     width: '100%',
     height: '100%',
@@ -63,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: '200% 100%',
     animation: '1.5s $shine linear infinite',
   },
-}));
+});
 
 const ImageTile: FC<ImageTileProps> = ({ image, onClick }) => {
   const classes = useStyles();
