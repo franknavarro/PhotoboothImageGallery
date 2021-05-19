@@ -1,13 +1,14 @@
+import EventGallery from './EventGallery';
+import EventLogin from './EventLogin';
+import Error404 from './Error404';
+import extractUsername from '../helpers/extractUsername';
+import { firestore } from '../helpers/firebase';
 import { FC, useCallback, useState } from 'react';
-import { useParams } from 'react-router';
+import { SignInErrors } from './EventLogin';
 import useAsync from '../hooks/useAsync';
 import { useAuth } from '../hooks/useAuth';
-import extractUsername from '../helpers/extractUsername';
-import EventLogin from './EventLogin';
-import EventGallery from './EventGallery';
-import { firestore } from '../helpers/firebase';
+import { useParams } from 'react-router';
 import useQuery from '../hooks/useQuery';
-import { SignInErrors } from './EventLogin';
 
 interface EventParams {
   eventId: string;
@@ -39,7 +40,7 @@ const Event: FC = () => {
   const { loading, value: eventName } = useAsync<string>(pageExists);
 
   if (loading) return <></>;
-  if (!eventName) return <div>Event Not Found</div>;
+  if (!eventName) return <Error404 />;
   if (
     !user ||
     (user && user.email && extractUsername(user.email) !== eventId)
