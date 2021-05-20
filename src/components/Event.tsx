@@ -1,14 +1,15 @@
+import CircularProgress from '@material-ui/core/CircularProgress';
 import EventGallery from './EventGallery';
 import EventLogin from './EventLogin';
 import Error404 from './Error404';
 import extractUsername from '../helpers/extractUsername';
 import { firestore } from '../helpers/firebase';
 import { FC, useEffect, useState } from 'react';
+import FullScreenContainer from './FullScreenContainer';
 import { SignInErrors } from './EventLogin';
 import { useAuth } from '../hooks/useAuth';
 import { useEventName } from '../hooks/useEventName';
-import { useParams } from 'react-router';
-import useQuery from '../hooks/useQuery';
+import { useParams, useHistory, useLocation } from 'react-router';
 
 interface EventParams {
   eventId: string;
@@ -20,32 +21,45 @@ const Event: FC = () => {
   const [signInError, setSignInError] = useState<SignInErrors>('null');
   const { eventName, setEventName } = useEventName();
   const [loading, setLoading] = useState<boolean>(true);
-  const queryParams = useQuery();
+
+  const history = useHistory();
+  const location = useLocation();
 
   useEffect(() => {
     const checkEvent = async () => {
       let eventName = '';
-      setLoading(true);
+      let secondLoad = false;
       try {
         const eventDetails = (await firestore.events.doc(eventId).get()).data();
         if (eventDetails) {
           eventName = eventDetails.name;
+          const queryParams = new URLSearchParams(location.search);
           const password = queryParams.get('p');
           if (!!eventName && !!password) {
+            secondLoad = true;
             await signIn(eventId, password);
           }
         }
       } catch (error) {
         setSignInError(error.code);
       } finally {
-        if (eventName) setEventName(eventName);
-        setLoading(false);
+        if (!secondLoad) {
+          if (eventName) setEventName(eventName);
+          setLoading(false);
+        } else {
+          history.replace(location.pathname);
+        }
       }
     };
     checkEvent();
-  }, [eventId, queryParams, signIn, setEventName]);
+  }, [eventId, signIn, setEventName, history, location]);
 
-  if (loading) return <></>;
+  if (loading)
+    return (
+      <FullScreenContainer>
+        <CircularProgress />
+      </FullScreenContainer>
+    );
   if (!eventName) return <Error404 />;
   if (
     !user ||
