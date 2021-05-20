@@ -35,10 +35,10 @@ const Event: FC = () => {
             await signIn(eventId, password);
           }
         }
-        setEventName(eventName);
       } catch (error) {
         setSignInError(error.code);
       } finally {
+        if (eventName) setEventName(eventName);
         setLoading(false);
       }
     };
