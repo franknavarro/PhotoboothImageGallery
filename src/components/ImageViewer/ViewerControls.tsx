@@ -1,7 +1,7 @@
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import CloseRoundedIcon from '@material-ui/icons/CloseRounded';
 import clsx from 'clsx';
-import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, FC, SetStateAction } from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import { ImageDocs } from '../../helpers/firebase';
 import { makeStyles } from '@material-ui/core/styles';
@@ -62,6 +62,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface ViewerControlsProps {
+  display: boolean;
   images: ImageDocs;
   onClose: () => void;
   play: boolean;
@@ -71,6 +72,7 @@ interface ViewerControlsProps {
 }
 
 const ViewerControls: FC<ViewerControlsProps> = ({
+  display,
   images,
   onClose,
   play,
@@ -79,25 +81,7 @@ const ViewerControls: FC<ViewerControlsProps> = ({
   setPosition,
 }) => {
   const classes = useStyles();
-
-  const [showControls, setShowControls] = useState<boolean>(true);
-  useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
-    const mouseMoving = () => {
-      setShowControls(true);
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        setShowControls(false);
-      }, 3000);
-    };
-    window.addEventListener('mousemove', mouseMoving);
-    return () => {
-      window.removeEventListener('mousemove', mouseMoving);
-      clearTimeout(timeout);
-    };
-  }, []);
-
-  const hideCSS = clsx(classes.controls, !showControls && classes.hide);
+  const hideCSS = clsx(classes.controls, !display && classes.hide);
 
   return (
     <>

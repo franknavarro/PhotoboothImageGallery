@@ -1,6 +1,6 @@
 import { Carousel } from 'react-responsive-carousel';
 import clsx from 'clsx';
-import { Dispatch, FC, SetStateAction, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 import { ImageDocs } from '../../helpers/firebase';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -12,7 +12,7 @@ const useStyles = makeStyles(() => ({
   modal: {
     zIndex: 1000,
     position: 'fixed',
-    background: 'rgb(0,0,0,0.95)',
+    background: 'rgb(0,0,0)',
     top: 0,
     left: 0,
     bottom: 0,
@@ -35,6 +35,9 @@ const useStyles = makeStyles(() => ({
   hide: {
     visibility: 'hidden',
     opacity: 0,
+  },
+  hideMouse: {
+    cursor: 'none',
   },
   slider: {
     width: '100%',
@@ -61,6 +64,27 @@ const ImageViewer: FC<ImageViewerProps> = ({
 }) => {
   const classes = useStyles();
   const [play, setPlay] = useState<boolean>(false);
+  const [showControls, setShowControls] = useState<boolean>(true);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    const mouseMoving = () => {
+      setShowControls(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    };
+    if (play) {
+      window.addEventListener('mousemove', mouseMoving);
+    } else {
+      setShowControls(true);
+    }
+    return () => {
+      window.removeEventListener('mousemove', mouseMoving);
+      clearTimeout(timeout);
+    };
+  }, [play]);
 
   return (
     <div
@@ -68,6 +92,7 @@ const ImageViewer: FC<ImageViewerProps> = ({
         classes.modal,
         classes.modalMobile,
         !display && classes.hide,
+        !showControls && classes.hideMouse,
       )}
     >
       <Carousel
@@ -86,6 +111,7 @@ const ImageViewer: FC<ImageViewerProps> = ({
         showIndicators={false}
         stopOnHover={false}
         swipeable={false}
+        interval={5000}
         useKeyboardArrows
       >
         {images.map((doc, index) => (
@@ -103,8 +129,12 @@ const ImageViewer: FC<ImageViewerProps> = ({
         ))}
       </Carousel>
       <ViewerControls
+        display={showControls}
         images={images}
-        onClose={onClose}
+        onClose={() => {
+          onClose();
+          setPlay(false);
+        }}
         play={play}
         position={position}
         setPlay={setPlay}
