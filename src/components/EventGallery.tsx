@@ -6,6 +6,7 @@ import { FC, useState } from 'react';
 import ImageTile from './ImageTile';
 import ImageViewer from './ImageViewer/ImageViewer';
 import LazyLoad from 'react-lazyload';
+import NoPhotos from './NoPhotos';
 import Toolbar from './Toolbar';
 import useImageLibrary from '../hooks/useImageLibrary';
 
@@ -69,8 +70,11 @@ const EventGallery: FC<EventGalleryProps> = ({ uid }) => {
     loadMoreRef,
     loadingImages,
     position,
+    retry,
     setPosition,
   } = useImageLibrary(uid);
+
+  if (!images.length) return <NoPhotos loading={loadingImages} retry={retry} />;
 
   return (
     <>

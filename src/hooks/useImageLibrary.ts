@@ -48,18 +48,19 @@ const useImageLibrary = (uid: string) => {
     setLoadingImages(false);
   }, [shouldFindNew, query, loadingImages, beginingOfPage]);
 
+  const getFirstPage = useCallback(async () => {
+    setLoadingImages(true);
+    const firstImages = await query.get();
+    setImages([...firstImages.docs]);
+    setStartNextPage(firstImages.docs[firstImages.size - 1]);
+    setBeginingOfPage(firstImages.docs[0]);
+    setLoadingImages(false);
+  }, [query]);
+
   // Load initial images
   useEffect(() => {
-    const getFirstPage = async () => {
-      setLoadingImages(true);
-      const firstImages = await query.get();
-      setImages([...firstImages.docs]);
-      setStartNextPage(firstImages.docs[firstImages.size - 1]);
-      setBeginingOfPage(firstImages.docs[0]);
-      setLoadingImages(false);
-    };
     getFirstPage();
-  }, [query]);
+  }, [getFirstPage]);
 
   // Load with infinite scroll
   const handleObserver = useCallback(
@@ -101,7 +102,14 @@ const useImageLibrary = (uid: string) => {
     startNextPage,
   ]);
 
-  return { images, loadingImages, loadMoreRef, position, setPosition };
+  return {
+    images,
+    loadingImages,
+    loadMoreRef,
+    position,
+    retry: getFirstPage,
+    setPosition,
+  };
 };
 
 export default useImageLibrary;
