@@ -10,6 +10,7 @@ import CarouselImage from './Image';
 
 const useStyles = makeStyles(() => ({
   modal: {
+    zIndex: 1000,
     position: 'fixed',
     background: 'rgb(0,0,0,0.95)',
     top: 0,

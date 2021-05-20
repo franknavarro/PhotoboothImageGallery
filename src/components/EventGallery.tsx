@@ -1,11 +1,12 @@
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Container from '@material-ui/core/Container';
+import Container from './Container';
 import clsx from 'clsx';
 import { FC, useState } from 'react';
 import ImageTile from './ImageTile';
 import ImageViewer from './ImageViewer/ImageViewer';
 import LazyLoad from 'react-lazyload';
+import Toolbar from './Toolbar';
 import useImageLibrary from '../hooks/useImageLibrary';
 
 interface EventGalleryProps {
@@ -73,7 +74,8 @@ const EventGallery: FC<EventGalleryProps> = ({ uid }) => {
 
   return (
     <>
-      <Container maxWidth="lg" classes={{ root: classes.container }}>
+      <Container>
+        <Toolbar />
         <ul className={classes.root}>
           {images.map((doc, index) => (
             <LazyLoad

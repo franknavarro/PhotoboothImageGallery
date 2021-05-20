@@ -8,6 +8,7 @@ import {
   Container,
   makeStyles,
   TextField,
+  Toolbar,
   Typography,
 } from '@material-ui/core';
 import { useAuth } from '../hooks/useAuth';
@@ -75,6 +76,7 @@ const EventLogin: FC<EventLoginProps> = ({
 
   return (
     <Container component="main" maxWidth="xs">
+      <Toolbar />
       <Card className={classes.paper}>
         <Avatar className={classes.avatar}>
           <PhotoLibraryIcon />

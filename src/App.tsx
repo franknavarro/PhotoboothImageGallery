@@ -6,6 +6,7 @@ import Event from './components/Event';
 import { EventNameProvider } from './hooks/useEventName';
 import { FC } from 'react';
 import Home from './components/Home';
+import NavigationBar from './components/NavigationBar';
 
 const App: FC = () => {
   return (
@@ -13,6 +14,7 @@ const App: FC = () => {
       <EventNameProvider>
         <CssBaseline />
         <Router>
+          <NavigationBar />
           <Switch>
             <Route exact path="/:eventId">
               <Event />
