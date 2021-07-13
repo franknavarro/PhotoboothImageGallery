@@ -111,6 +111,7 @@ const ImageViewer: FC<ImageViewerProps> = ({
         showIndicators={false}
         stopOnHover={false}
         swipeable={false}
+        emulateTouch={false}
         interval={5000}
         useKeyboardArrows
       >
